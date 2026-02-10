@@ -55,7 +55,7 @@ export function MatchHero({ match }: MatchHeroProps) {
 
           {/* Minute Pill */}
           <div className="bg-surface text-text-primary text-sm font-bold px-3 py-0.5 rounded-full">
-            {match.minute}'
+            {match.minute}&apos;
           </div>
         </div>
 

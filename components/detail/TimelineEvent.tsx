@@ -21,7 +21,7 @@ export function TimelineEvent({
     >
       {/* Minute */}
       <span className={`text-xs font-bold text-muted w-8 flex-shrink-0 ${textAlignment}`}>
-        {event.minute}'
+        {event.minute}&apos;
       </span>
 
       {/* Icon */}

@@ -39,6 +39,12 @@ export default function DashboardPage() {
 
         {/* League Filter Pills */}
         <LeaguePill
+          leagues={[
+            { id: 'all', name: 'All' },
+            { id: 'pl', name: 'Premier League' },
+            { id: 'la-liga', name: 'La Liga' },
+            { id: 'serie-a', name: 'Serie A' },
+          ]}
           activeLeague={selectedLeague}
           onLeagueChange={setSelectedLeague}
         />

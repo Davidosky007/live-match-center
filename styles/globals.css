@@ -388,25 +388,26 @@ body {
 /* Chat Message Styling */
 .chat-bubble-own {
   background-color: var(--accent);
-  color: #111827;
+  color: #111827 !important;
   border-radius: 18px 18px 6px 18px;
   animation: slideInRight 0.2s ease-out;
   font-weight: 500;
 }
 
 .dark .chat-bubble-own {
-  color: #111827;
+  color: #111827 !important;
+  background-color: var(--accent);
 }
 
 .chat-bubble-other {
   background-color: var(--chat-other);
-  color: #111827;
+  color: #111827 !important;
   border-radius: 18px 18px 18px 6px;
   animation: slideInLeft 0.2s ease-out;
 }
 
 .dark .chat-bubble-other {
-  color: #f0f4e0;
+  color: #111827 !important;
   background-color: #252b17;
 }
 

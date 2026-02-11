@@ -6,6 +6,25 @@ const SOCKET_URL =
 
 // Module-scoped singleton to prevent duplicate connections
 let socket: Socket | null = null;
+let connectionStatusCallback: ((status: 'connected' | 'reconnecting' | 'disconnected', attempt?: number) => void) | null = null;
+
+/**
+ * Register a callback to be notified of connection status changes
+ */
+export function onConnectionStatusChange(
+  callback: (status: 'connected' | 'reconnecting' | 'disconnected', attempt?: number) => void
+): void {
+  connectionStatusCallback = callback;
+}
+
+/**
+ * Helper to notify connection status change
+ */
+function notifyConnectionStatus(status: 'connected' | 'reconnecting' | 'disconnected', attempt?: number): void {
+  if (connectionStatusCallback) {
+    connectionStatusCallback(status, attempt);
+  }
+}
 
 /**
  * Get or create Socket.IO client instance (singleton)
@@ -18,37 +37,45 @@ export function getSocket(): Socket {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 30000,
       randomizationFactor: 0.5,
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
       autoConnect: true,
+      secure: true,
     });
 
-    // Global connection event handlers for debugging
+    // Connection event handlers
     socket.on('connect', () => {
       console.log('[Socket] Connected:', socket?.id);
+      notifyConnectionStatus('connected');
     });
 
     socket.on('disconnect', (reason) => {
       console.log('[Socket] Disconnected:', reason);
+      notifyConnectionStatus('disconnected');
     });
 
     socket.on('connect_error', (error) => {
       console.error('[Socket] Connection error:', error.message);
-    });
-
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('[Socket] Reconnected after', attemptNumber, 'attempts');
+      notifyConnectionStatus('disconnected');
     });
 
     socket.on('reconnect_attempt', (attemptNumber) => {
       console.log('[Socket] Reconnection attempt:', attemptNumber);
+      notifyConnectionStatus('reconnecting', attemptNumber);
+    });
+
+    socket.on('reconnect', (attemptNumber) => {
+      console.log('[Socket] Reconnected after', attemptNumber, 'attempts');
+      notifyConnectionStatus('connected');
     });
 
     socket.on('reconnect_error', (error) => {
       console.error('[Socket] Reconnection error:', error.message);
+      notifyConnectionStatus('reconnecting');
     });
 
     socket.on('reconnect_failed', () => {
-      console.error('[Socket] Reconnection failed');
+      console.error('[Socket] Reconnection failed - will keep retrying');
+      notifyConnectionStatus('disconnected');
     });
   }
 

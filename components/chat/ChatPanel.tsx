@@ -54,13 +54,21 @@ export function ChatPanel({ matchId }: ChatPanelProps) {
     const success = await sendMessage(messageText);
     if (success) {
       setMessageText('');
+      // Explicitly stop typing after send
+      emitTyping(false);
     }
   };
 
   const handleInputChange = (value: string) => {
     if (value.length <= MAX_MESSAGE_LENGTH) {
       setMessageText(value);
-      emitTyping();
+      // Emit typing only when content is added (not empty)
+      if (value.length > 0) {
+        emitTyping(true);
+      } else {
+        // Stop typing when input is cleared
+        emitTyping(false);
+      }
     }
   };
 

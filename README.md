@@ -2,8 +2,8 @@
 
 A real-time football match tracking app built with Next.js 14, TypeScript, and Socket.IO.
 
-→ **[Live Demo](https://live-match-center.vercel.app)**  
-→ **[Repository](https://github.com/your-username/live-match-center)**
+→ **[Live Demo](https://live-match-center-tau.vercel.app)**  
+→ **[Repository](https://github.com/Davidosky007/live-match-center)**
 
 ---
 

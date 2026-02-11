@@ -126,15 +126,12 @@ export function useMatchChat(matchId: string) {
   }, [matchId, socket]);
 
   // Debounced typing indicator
-  const emitTyping = useCallback(
-    debounce(() => {
-      socket.emit(SOCKET_EVENTS.TYPING_STOP, {
-        matchId,
-        userId: user?.userId,
-      });
-    }, 2000),
-    [socket, matchId, user?.userId]
-  );
+  const emitTyping = useCallback(() => {
+    socket.emit(SOCKET_EVENTS.TYPING_STOP, {
+      matchId,
+      userId: user?.userId,
+    });
+  }, [socket, matchId, user?.userId]);
 
   // Send message
   const sendMessage = useCallback(

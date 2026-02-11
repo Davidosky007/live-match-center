@@ -6,15 +6,16 @@ import {
   MatchDetailResponse,
 } from './types';
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'https://profootball.srv883830.hstgr.cloud';
+// Use local API routes (which proxy to the backend)
+// This avoids CORS issues by keeping requests same-origin
+const BASE_URL = '/api';
 
 /**
  * Fetch all matches
  */
 export async function fetchMatches(): Promise<Match[]> {
   try {
-    const res = await fetch(`${BASE_URL}/api/matches`, {
+    const res = await fetch(`${BASE_URL}/matches`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ export async function fetchMatches(): Promise<Match[]> {
  */
 export async function fetchLiveMatches(): Promise<Match[]> {
   try {
-    const res = await fetch(`${BASE_URL}/api/matches/live`, {
+    const res = await fetch(`${BASE_URL}/matches/live`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ export async function fetchLiveMatches(): Promise<Match[]> {
  */
 export async function fetchMatchDetail(id: string): Promise<MatchDetail> {
   try {
-    const res = await fetch(`${BASE_URL}/api/matches/${id}`, {
+    const res = await fetch(`${BASE_URL}/matches/${id}`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',

@@ -26,58 +26,63 @@ export function useMatchChat(matchId: string) {
       return;
     }
 
-    // Wait for socket to be ready
-    if (!socket.connected) {
-      console.log('[Chat] Socket not connected yet, waiting...');
-      const checkInterval = setInterval(() => {
-        if (socket.connected) {
-          clearInterval(checkInterval);
-          socket.emit(SOCKET_EVENTS.JOIN_CHAT, {
-            matchId,
-            userId: user.userId,
-            username: user.username,
-          });
-          console.log('[Chat] Joined room:', matchId);
-        }
-      }, 100);
+    let hasJoined = false;
+    let checkInterval: NodeJS.Timeout | null = null;
 
-      // Cleanup interval on unmount
-      return () => {
-        clearInterval(checkInterval);
-      };
-    }
-
-    // Emit join_chat event
-    socket.emit(SOCKET_EVENTS.JOIN_CHAT, {
-      matchId,
-      userId: user.userId,
-      username: user.username,
-    });
-
-    console.log('[Chat] Joined room:', matchId);
-
-    // Cleanup on unmount - capture current values
-    return () => {
-      console.log('[Chat] Component unmounting, sending leave_chat');
-      
-      socket.emit(SOCKET_EVENTS.LEAVE_CHAT, {
+    // Function to emit join_chat
+    const emitJoin = () => {
+      socket.emit(SOCKET_EVENTS.JOIN_CHAT, {
         matchId,
         userId: user.userId,
         username: user.username,
       });
+      hasJoined = true;
+      console.log('[Chat] Joined room:', matchId);
+    };
+
+    // Wait for socket to be ready
+    if (!socket.connected) {
+      console.log('[Chat] Socket not connected yet, waiting...');
+      checkInterval = setInterval(() => {
+        if (socket.connected) {
+          if (checkInterval) clearInterval(checkInterval);
+          emitJoin();
+        }
+      }, 100);
+    } else {
+      // Socket already connected
+      emitJoin();
+    }
+
+    // Cleanup on unmount
+    return () => {
+      // Clear polling interval if still active
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+
+      // Only emit leave_chat if we actually joined
+      if (hasJoined) {
+        console.log('[Chat] Component unmounting, sending leave_chat');
+        socket.emit(SOCKET_EVENTS.LEAVE_CHAT, {
+          matchId,
+          userId: user.userId,
+          username: user.username,
+        });
+      }
 
       // Clear typing timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
 
-      // Emit typing_stop
-      socket.emit(SOCKET_EVENTS.TYPING_STOP, {
-        matchId,
-        userId: user.userId,
-      });
-
-      console.log('[Chat] Left room:', matchId);
+      // Emit typing_stop if we were typing
+      if (isTypingRef.current) {
+        socket.emit(SOCKET_EVENTS.TYPING_STOP, {
+          matchId,
+          userId: user.userId,
+        });
+      }
     };
   }, [matchId, socket, user?.userId, user?.username]);
 
@@ -191,7 +196,7 @@ export function useMatchChat(matchId: string) {
     };
   }, [matchId, socket]);
 
-  // Handle typing with debounce (300ms delay before emitting start, 2s to emit stop)
+  // Handle typing with proper debounce (send start on first keystroke, debounce stop after 2s)
   const emitTyping = useCallback(
     (isTyping: boolean = true) => {
       if (!user?.userId || !user?.username || !matchId) {
@@ -204,39 +209,37 @@ export function useMatchChat(matchId: string) {
         return;
       }
 
-      // Clear existing timeout
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-
       if (isTyping) {
-        // Set up new timeout that does TWO things:
-        // 1. After 300ms: emit typing_start (if not already sent)
-        // 2. After 2s total: emit typing_stop
-        typingTimeoutRef.current = setTimeout(() => {
-          // First timeout: 300ms - send typing_start if not already sent
-          if (!isTypingRef.current && socket.connected) {
-            socket.emit(SOCKET_EVENTS.TYPING_START, {
-              matchId,
-              userId: user.userId,
-              username: user.username,
-            });
-            isTypingRef.current = true;
-            console.log('[Chat] Emitted typing_start');
+        // Only send typing_start if not already typing
+        if (!isTypingRef.current) {
+          socket.emit(SOCKET_EVENTS.TYPING_START, {
+            matchId,
+            userId: user.userId,
+            username: user.username,
+          });
+          isTypingRef.current = true;
+          console.log('[Chat] Emitted typing_start');
+        }
 
-            // Schedule second timeout: auto-stop after additional 1.7s (total 2s)
-            typingTimeoutRef.current = setTimeout(() => {
-              socket.emit(SOCKET_EVENTS.TYPING_STOP, {
-                matchId,
-                userId: user.userId,
-              });
-              isTypingRef.current = false;
-              console.log('[Chat] Emitted typing_stop (timeout)');
-            }, 1700);
-          }
-        }, 300);
+        // Clear any existing stop timeout
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Set timeout to emit typing_stop after 2s of inactivity
+        typingTimeoutRef.current = setTimeout(() => {
+          socket.emit(SOCKET_EVENTS.TYPING_STOP, {
+            matchId,
+            userId: user.userId,
+          });
+          isTypingRef.current = false;
+          console.log('[Chat] Emitted typing_stop (timeout)');
+        }, 2000);
       } else {
         // Explicitly stop typing
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
         socket.emit(SOCKET_EVENTS.TYPING_STOP, {
           matchId,
           userId: user.userId,

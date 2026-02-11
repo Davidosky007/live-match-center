@@ -14,7 +14,7 @@ export function ConnectionStatusBar() {
   return (
     <div
       className={`
-        fixed top-0 left-0 right-0 z-50 text-center py-2 text-xs font-medium text-white
+        fixed top-0 left-0 right-0 z-50 text-center py-2 text-xs font-medium text-black
         ${status === 'reconnecting' ? 'bg-warn/90' : 'bg-error/90'}
         ${status === 'reconnecting' ? 'slide-down' : ''}
       `}

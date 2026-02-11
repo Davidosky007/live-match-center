@@ -190,6 +190,11 @@ export function useMatchChat(matchId: string) {
     socket.on(SOCKET_EVENTS.ERROR, handleError);
     console.log('[Chat] All listeners registered');
 
+    // DEBUG: Log all events from server
+    socket.onAny((eventName: string, ...args: any[]) => {
+      console.log('[Chat] SERVER EVENT RECEIVED:', eventName, args);
+    });
+
     return () => {
       socket.off(SOCKET_EVENTS.CHAT_MESSAGE, handleChatMessage);
       socket.off(SOCKET_EVENTS.USER_JOINED, handleUserJoined);

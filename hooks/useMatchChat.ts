@@ -20,7 +20,7 @@ export function useMatchChat(matchId: string) {
 
   // Join chat room on mount
   useEffect(() => {
-    // Only join if we have user ID, username, and matchId
+   
     if (!user?.userId || !user?.username || !matchId) {
       console.log('[Chat] Waiting for user data...', { userId: user?.userId, username: user?.username, matchId });
       return;
@@ -29,7 +29,7 @@ export function useMatchChat(matchId: string) {
     let hasJoined = false;
     let checkInterval: NodeJS.Timeout | null = null;
 
-    // Function to emit join_chat
+  
     const emitJoin = () => {
       socket.emit(SOCKET_EVENTS.JOIN_CHAT, {
         matchId,
@@ -40,7 +40,7 @@ export function useMatchChat(matchId: string) {
       console.log('[Chat] Joined room:', matchId);
     };
 
-    // Wait for socket to be ready
+    
     if (!socket.connected) {
       console.log('[Chat] Socket not connected yet, waiting...');
       checkInterval = setInterval(() => {
@@ -50,18 +50,17 @@ export function useMatchChat(matchId: string) {
         }
       }, 100);
     } else {
-      // Socket already connected
+     
       emitJoin();
     }
 
-    // Cleanup on unmount
+   
     return () => {
-      // Clear polling interval if still active
       if (checkInterval) {
         clearInterval(checkInterval);
       }
 
-      // Only emit leave_chat if we actually joined
+    
       if (hasJoined) {
         console.log('[Chat] Component unmounting, sending leave_chat');
         socket.emit(SOCKET_EVENTS.LEAVE_CHAT, {
@@ -71,12 +70,12 @@ export function useMatchChat(matchId: string) {
         });
       }
 
-      // Clear typing timeout
+     
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
 
-      // Emit typing_stop if we were typing
+     
       if (isTypingRef.current) {
         socket.emit(SOCKET_EVENTS.TYPING_STOP, {
           matchId,

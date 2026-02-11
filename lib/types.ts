@@ -1,4 +1,4 @@
-// Core match and event types
+
 
 export type MatchStatus =
   | 'NOT_STARTED'

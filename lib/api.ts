@@ -6,8 +6,7 @@ import {
   MatchDetailResponse,
 } from './types';
 
-// Use local API routes (which proxy to the backend)
-// This avoids CORS issues by keeping requests same-origin
+
 const BASE_URL = '/api';
 
 /**

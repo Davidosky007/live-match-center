@@ -101,7 +101,7 @@ export function isSocketConnected(): boolean {
   return socket?.connected ?? false;
 }
 
-// WebSocket event names (for reference and type safety)
+
 export const SOCKET_EVENTS = {
   // Client -> Server
   SUBSCRIBE_MATCH: 'subscribe_match',
@@ -121,7 +121,7 @@ export const SOCKET_EVENTS = {
   USER_JOINED: 'user_joined',
   USER_LEFT: 'user_left',
   TYPING_INDICATOR: 'typing_indicator',
-  TYPING: 'typing',  // Backend sends 'typing' not 'typing_indicator'
+  TYPING: 'typing',  
   ERROR: 'error',
 
   // Connection events

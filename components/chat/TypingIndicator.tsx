@@ -15,13 +15,13 @@ export function TypingIndicator({ typingUsers }: TypingIndicatorProps) {
   const rest = typingUsers.length > 2 ? ` and ${typingUsers.length - 2} others` : '';
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 animate-slideInLeft">
+    <div className="flex items-center gap-2 px-4 py-1 animate-slideInLeft">
       <div className="flex gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0s' }} />
-        <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.2s' }} />
-        <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.4s' }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0s' }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.2s' }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.4s' }} />
       </div>
-      <p className="text-xs text-muted italic font-medium">
+      <p className="text-xs text-muted italic">
         {userList}
         {rest} {typingUsers.length === 1 ? 'is' : 'are'} typing…
       </p>

@@ -15,8 +15,8 @@ export function ChatMessageComponent({ msg }: ChatMessageComponentProps) {
 
   if (isSystemMessage) {
     return (
-      <div className="flex justify-center py-3 px-4 animate-fadeIn">
-        <p className="text-xs text-muted text-center italic font-medium">
+      <div className="flex justify-center py-1 px-4 animate-fadeIn">
+        <p className="text-xs text-muted text-center italic">
           ⋯ {msg.message} ⋯
         </p>
       </div>

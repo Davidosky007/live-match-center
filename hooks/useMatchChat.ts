@@ -181,11 +181,14 @@ export function useMatchChat(matchId: string) {
       }
     };
 
+    console.log('[Chat] Setting up socket listeners for matchId:', matchId);
     socket.on(SOCKET_EVENTS.CHAT_MESSAGE, handleChatMessage);
     socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined);
     socket.on(SOCKET_EVENTS.USER_LEFT, handleUserLeft);
+    console.log('[Chat] Registering TYPING_INDICATOR listener on event:', SOCKET_EVENTS.TYPING_INDICATOR);
     socket.on(SOCKET_EVENTS.TYPING_INDICATOR, handleTypingIndicator);
     socket.on(SOCKET_EVENTS.ERROR, handleError);
+    console.log('[Chat] All listeners registered');
 
     return () => {
       socket.off(SOCKET_EVENTS.CHAT_MESSAGE, handleChatMessage);
@@ -200,25 +203,33 @@ export function useMatchChat(matchId: string) {
   const emitTyping = useCallback(
     (isTyping: boolean = true) => {
       if (!user?.userId || !user?.username || !matchId) {
-        console.log('[Chat] Cannot emit typing - missing user data');
+        console.log('[Chat] Cannot emit typing - missing user data', { userId: user?.userId, username: user?.username, matchId });
         return;
       }
 
-      if (!socket.connected) {
-        console.log('[Chat] Socket not connected, cannot emit typing');
+      // Get fresh socket reference
+      const currentSocket = getSocket();
+      
+      if (!currentSocket || !currentSocket.connected) {
+        console.log('[Chat] Socket not connected, cannot emit typing', { connected: currentSocket?.connected });
         return;
       }
+
+      console.log('[Chat] emitTyping called with isTyping=', isTyping, 'isTypingRef.current=', isTypingRef.current);
 
       if (isTyping) {
         // Only send typing_start if not already typing
         if (!isTypingRef.current) {
-          socket.emit(SOCKET_EVENTS.TYPING_START, {
+          console.log('[Chat] Emitting TYPING_START event');
+          currentSocket.emit(SOCKET_EVENTS.TYPING_START, {
             matchId,
             userId: user.userId,
             username: user.username,
           });
           isTypingRef.current = true;
           console.log('[Chat] Emitted typing_start');
+        } else {
+          console.log('[Chat] Already typing, skipping typing_start');
         }
 
         // Clear any existing stop timeout
@@ -228,10 +239,14 @@ export function useMatchChat(matchId: string) {
 
         // Set timeout to emit typing_stop after 2s of inactivity
         typingTimeoutRef.current = setTimeout(() => {
-          socket.emit(SOCKET_EVENTS.TYPING_STOP, {
-            matchId,
-            userId: user.userId,
-          });
+          console.log('[Chat] Typing timeout - emitting TYPING_STOP');
+          const socket = getSocket();
+          if (socket?.connected) {
+            socket.emit(SOCKET_EVENTS.TYPING_STOP, {
+              matchId,
+              userId: user.userId,
+            });
+          }
           isTypingRef.current = false;
           console.log('[Chat] Emitted typing_stop (timeout)');
         }, 2000);
@@ -240,7 +255,8 @@ export function useMatchChat(matchId: string) {
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current);
         }
-        socket.emit(SOCKET_EVENTS.TYPING_STOP, {
+        console.log('[Chat] Emitting explicit TYPING_STOP');
+        currentSocket.emit(SOCKET_EVENTS.TYPING_STOP, {
           matchId,
           userId: user.userId,
         });
@@ -248,7 +264,7 @@ export function useMatchChat(matchId: string) {
         console.log('[Chat] Emitted typing_stop (explicit)');
       }
     },
-    [socket, matchId, user?.userId, user?.username]
+    [matchId, user?.userId, user?.username]
   );
 
   // Send message

@@ -55,6 +55,7 @@ export function ChatPanel({ matchId }: ChatPanelProps) {
     if (success) {
       setMessageText('');
       // Explicitly stop typing after send
+      console.log("[ChatPanel] Message sent, emitting typing=false");
       emitTyping(false);
     }
   };
@@ -64,9 +65,11 @@ export function ChatPanel({ matchId }: ChatPanelProps) {
       setMessageText(value);
       // Emit typing only when content is added (not empty)
       if (value.length > 0) {
+        console.log('[ChatPanel] handleInputChange: typing=true, length=', value.length);
         emitTyping(true);
       } else {
         // Stop typing when input is cleared
+        console.log('[ChatPanel] handleInputChange: typing=false (cleared)');
         emitTyping(false);
       }
     }

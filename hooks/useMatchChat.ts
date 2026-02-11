@@ -185,7 +185,9 @@ export function useMatchChat(matchId: string) {
     socket.on(SOCKET_EVENTS.CHAT_MESSAGE, handleChatMessage);
     socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined);
     socket.on(SOCKET_EVENTS.USER_LEFT, handleUserLeft);
-    console.log('[Chat] Registering TYPING_INDICATOR listener on event:', SOCKET_EVENTS.TYPING_INDICATOR);
+    console.log('[Chat] Registering TYPING listener on event:', SOCKET_EVENTS.TYPING);
+    socket.on(SOCKET_EVENTS.TYPING, handleTypingIndicator);
+    // Also listen to typing_indicator for compatibility
     socket.on(SOCKET_EVENTS.TYPING_INDICATOR, handleTypingIndicator);
     socket.on(SOCKET_EVENTS.ERROR, handleError);
     console.log('[Chat] All listeners registered');
@@ -199,6 +201,7 @@ export function useMatchChat(matchId: string) {
       socket.off(SOCKET_EVENTS.CHAT_MESSAGE, handleChatMessage);
       socket.off(SOCKET_EVENTS.USER_JOINED, handleUserJoined);
       socket.off(SOCKET_EVENTS.USER_LEFT, handleUserLeft);
+      socket.off(SOCKET_EVENTS.TYPING, handleTypingIndicator);
       socket.off(SOCKET_EVENTS.TYPING_INDICATOR, handleTypingIndicator);
       socket.off(SOCKET_EVENTS.ERROR, handleError);
     };

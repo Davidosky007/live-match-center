@@ -68,17 +68,22 @@ export function ChatPanel({ matchId }: ChatPanelProps) {
   const isOverLimit = charCount > 480;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
-      {/* Messages */}
+    <div className="flex flex-col h-[calc(100vh-120px)] bg-bg">
+      {/* Messages Container */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto space-y-2 py-4"
+        className="flex-1 overflow-y-auto scrollbar-hide space-y-1 py-4 px-2"
       >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-muted text-center">
-              No messages yet. Be the first to message!
-            </p>
+            <div className="text-center">
+              <p className="text-sm text-muted">
+                💬 No messages yet
+              </p>
+              <p className="text-xs text-muted mt-2">
+                Be the first to join the chat!
+              </p>
+            </div>
           </div>
         ) : (
           messages.map((msg) => (
@@ -88,7 +93,9 @@ export function ChatPanel({ matchId }: ChatPanelProps) {
 
         {/* Typing indicator */}
         {typingUsers.length > 0 && (
-          <TypingIndicator typingUsers={typingUsers} />
+          <div className="px-4 py-2">
+            <TypingIndicator typingUsers={typingUsers} />
+          </div>
         )}
 
         <div ref={messagesEndRef} />
@@ -98,59 +105,85 @@ export function ChatPanel({ matchId }: ChatPanelProps) {
       {hasNewMessages && (
         <button
           onClick={scrollToBottom}
-          className="mx-4 mb-2 px-3 py-1.5 bg-accent rounded-full text-xs font-semibold text-accent-fg"
+          className="mx-4 mb-3 px-4 py-2 bg-accent hover:opacity-90 rounded-full text-xs font-bold text-accent-fg transition-all duration-200 slide-in-up shadow-md"
+          aria-label="Jump to new messages"
         >
-          ↓ New messages
+          ↓ {messages.filter(m => m.userId !== 'system').length > 5 ? '5+' : ''} New messages
         </button>
       )}
 
-      {/* Input */}
-      <div className="border-t border-border bg-surface p-3">
+      {/* Input Section */}
+      <div className="border-t border-border bg-surface p-4 space-y-3">
+        {/* Error Message */}
         {chatError && (
-          <div className="text-xs text-error mb-2 shake">{chatError}</div>
+          <div className="text-xs text-error bg-error bg-opacity-10 rounded-lg px-3 py-2 font-medium shake">
+            ⚠️ {chatError}
+          </div>
         )}
 
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={messageText}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="Type a message..."
-            maxLength={MAX_MESSAGE_LENGTH}
-            disabled={isSending || rateLimited}
-            className="flex-1 bg-bg border border-border rounded-full px-4 py-2 text-sm text-text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50"
-            aria-label="Type a message"
-          />
+        {/* Rate limit status */}
+        {rateLimited && (
+          <div className="text-xs text-warn bg-warn bg-opacity-10 rounded-lg px-3 py-2 font-medium">
+            ⏱️ Please wait before sending another message...
+          </div>
+        )}
 
-          {/* Character count */}
-          <span
-            className={`text-xs whitespace-nowrap ${
-              isOverLimit ? 'text-error font-semibold' : 'text-muted'
-            }`}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {charCount}/{MAX_MESSAGE_LENGTH}
-          </span>
+        {/* Input Field */}
+        <div className="flex items-end gap-2">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={messageText}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder="Type a message..."
+              maxLength={MAX_MESSAGE_LENGTH}
+              disabled={isSending || rateLimited}
+              className="input-modern w-full text-sm pr-16 transition-smooth"
+              aria-label="Type a message"
+            />
+            
+            {/* Character Counter - Absolute positioned */}
+            <span
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-xs whitespace-nowrap font-medium transition-colors ${
+                isOverLimit ? 'text-error' : 'text-muted'
+              }`}
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {charCount}/{MAX_MESSAGE_LENGTH}
+            </span>
+          </div>
 
-          {/* Send button */}
+          {/* Send Button */}
           <button
             onClick={handleSend}
             disabled={
               !messageText.trim() || isSending || rateLimited || isOverLimit
             }
-            className="w-9 h-9 rounded-full bg-accent flex items-center justify-center font-semibold text-accent-fg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-200 flex-shrink-0 ${
+              !messageText.trim() || isSending || rateLimited || isOverLimit
+                ? 'bg-border text-muted cursor-not-allowed'
+                : 'bg-accent text-accent-fg hover:shadow-lg hover:scale-110 active:scale-95'
+            }`}
             aria-label="Send message"
+            title={isSending ? 'Sending...' : rateLimited ? 'Rate limited' : 'Send'}
           >
-            →
+            {isSending ? '⋯' : '→'}
           </button>
         </div>
+
+        {/* Helper text */}
+        {isOverLimit && (
+          <p className="text-xs text-error font-medium">
+            Message too long. Maximum {MAX_MESSAGE_LENGTH} characters.
+          </p>
+        )}
       </div>
     </div>
   );

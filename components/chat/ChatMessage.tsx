@@ -15,9 +15,9 @@ export function ChatMessageComponent({ msg }: ChatMessageComponentProps) {
 
   if (isSystemMessage) {
     return (
-      <div className="flex justify-center py-2">
-        <p className="text-xs text-muted text-center">
-          — {msg.message} —
+      <div className="flex justify-center py-3 px-4 animate-fadeIn">
+        <p className="text-xs text-muted text-center italic font-medium">
+          ⋯ {msg.message} ⋯
         </p>
       </div>
     );
@@ -25,27 +25,27 @@ export function ChatMessageComponent({ msg }: ChatMessageComponentProps) {
 
   return (
     <div
-      className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} px-4 py-2`}
+      className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} px-4 py-2 animate-slideInUp`}
     >
-      <div className={`max-w-[75%] ${isOwnMessage ? 'items-end' : 'items-start'}`}>
+      <div className={`max-w-[75%] flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'}`}>
         {!isOwnMessage && (
-          <p className="text-xs font-semibold text-muted mb-0.5">
+          <p className="text-xs font-semibold text-accent mb-1">
             {msg.username}
           </p>
         )}
         <div
           className={`
-            rounded-2xl px-4 py-2 text-sm break-words
+            rounded-2xl px-4 py-2.5 text-sm break-words shadow-sm transition-all
             ${
               isOwnMessage
-                ? 'bg-chat-own text-accent-fg rounded-br-sm'
-                : 'bg-chat-other text-text-primary rounded-bl-sm'
+                ? 'chat-bubble-own'
+                : 'chat-bubble-other'
             }
           `}
         >
           {msg.message}
         </div>
-        <p className="text-xs text-muted mt-1">
+        <p className="text-xs text-muted mt-1 px-2">
           {formatRelativeTime(msg.timestamp)}
         </p>
       </div>

@@ -18,77 +18,83 @@ export function MatchCard({ match, onScoreFlash }: MatchCardProps) {
   return (
     <Link
       href={`/matches/${match.id}`}
-      className="block bg-surface rounded-md p-4 shadow-card hover:shadow-lg hover:bg-surface-2 transition-all duration-200"
+      className="block card-modern transition-smooth"
       role="article"
       aria-label={`${match.homeTeam.name} vs ${match.awayTeam.name}`}
     >
       {/* Header with league and favorite */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold text-muted">
-          Premier League
+      <div className="flex items-center justify-between mb-3 px-4 pt-4">
+        <span className="text-xs font-bold text-accent uppercase tracking-wide">
+          🏆 {match.homeTeam.name.split(' ')[0]}
         </span>
         <button
           onClick={(e) => e.preventDefault()}
-          className="text-lg hover:text-live transition-colors"
+          className="text-lg hover:scale-110 transition-transform duration-200"
           aria-label="Add to favorites"
         >
-          🤍
+          ♡
         </button>
       </div>
 
       {/* Match Content */}
-      <div className="flex items-center justify-between gap-4 my-4">
+      <div className="flex items-center justify-between gap-6 my-6 px-4">
         {/* Home Team */}
         <div className="flex flex-col items-center flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-surface-2 mb-2 flex-shrink-0" />
-          <span className="text-xs font-semibold text-center truncate">
+          <div className="team-crest w-10 h-10 mb-2 flex-shrink-0 text-lg">
+            {match.homeTeam.shortName.charAt(0)}
+          </div>
+          <span className="text-xs font-bold text-text-primary text-center truncate">
             {match.homeTeam.shortName}
           </span>
         </div>
 
         {/* Score or VS */}
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-2">
           {isUpcoming ? (
-            <span className="text-sm font-semibold text-muted">VS</span>
+            <span className="text-sm font-bold text-muted">VS</span>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-text-primary">
+              <span className="text-3xl font-extrabold text-text-primary animate-slideInLeft">
                 {match.homeScore}
               </span>
-              <span className="text-lg font-light text-muted">–</span>
-              <span className="text-2xl font-extrabold text-text-primary">
+              <span className="text-xl font-light text-muted">–</span>
+              <span className="text-3xl font-extrabold text-text-primary animate-slideInRight">
                 {match.awayScore}
               </span>
             </div>
           )}
 
           {/* Minute or Time */}
-          <div className="text-xs font-bold text-muted">
+          <div className="text-xs font-bold text-accent">
             {isLive ? (
-              <span>{formatMinute(match.minute, match.status)}</span>
+              <span className="bg-accent bg-opacity-20 px-2 py-1 rounded-full">
+                {formatMinute(match.minute, match.status)}
+              </span>
             ) : isUpcoming ? (
               <span className="text-xs text-muted">
                 {formatMatchTime(match.startTime)}
               </span>
             ) : (
-              <span>FT</span>
+              <span className="text-muted">FT</span>
             )}
           </div>
         </div>
 
         {/* Away Team */}
         <div className="flex flex-col items-center flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-surface-2 mb-2 flex-shrink-0" />
-          <span className="text-xs font-semibold text-center truncate">
+          <div className="team-crest w-10 h-10 mb-2 flex-shrink-0 text-lg">
+            {match.awayTeam.shortName.charAt(0)}
+          </div>
+          <span className="text-xs font-bold text-text-primary text-center truncate">
             {match.awayTeam.shortName}
           </span>
         </div>
       </div>
 
       {/* Status Badge */}
-      <div className="flex items-center justify-between pt-2 border-t border-border">
+      <div className="flex items-center justify-between pt-3 px-4 pb-4 border-t border-border">
         <MatchStatusBadge status={match.status} minute={match.minute} />
-        <span className="text-xs text-muted">→</span>
+        <span className="text-xs text-accent font-bold transition-transform group-hover:translate-x-1">→</span>
       </div>
     </Link>
   );
